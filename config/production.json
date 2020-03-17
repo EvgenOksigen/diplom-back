@@ -1,0 +1,9 @@
+{
+  "env": "prod",
+  "psql": {
+    "uri": "psql-prod"
+  },
+  "jwt": {
+    "secret": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dpbiI6ImphY2tncmVlbiIsImlhdCI6MTU4MzMyOTQzMX0.aoBp2BcMbhbxxA4SOQDeMR6M6-0NuMc3Qo9Af44g44Q"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "babel-node app/server",
+    "dev": "nodemon --exec 'yarn start'"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^10.1.0",
+    "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-stage-0": "^6.24.1",
+    "eslint": "^6.8.0",
+    "eslint-config-google": "^0.14.0",
+    "moment": "^2.24.0"
+  },
+  "dependencies": {
+    "config": "^3.2.6",
+    "dotenv": "^8.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "keymirror": "^0.1.1",
+    "koa": "^2.11.0",
+    "koa-bodyparser": "^4.2.1",
+    "koa-logger": "^3.2.1",
+    "koa-router": "^8.0.8",
+    "lodash": "^4.17.15",
+    "nodemon": "^2.0.2",
+    "pg": "^7.18.2",
+    "pg-connection-string": "^2.1.0"
+  }
+}
