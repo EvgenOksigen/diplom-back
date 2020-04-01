@@ -17,8 +17,8 @@ app.use(async(ctx, next) => {
 
 app.use(modules);
 
-app.use(async ctx => {
-  ctx.body = '<h1>Hi</h1>'
-})
+// app.use(async ctx => {
+//   ctx.body = '<h1>Hi</h1>'
+// })
 
 export default app

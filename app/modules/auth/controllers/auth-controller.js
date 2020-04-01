@@ -1,94 +1,108 @@
 import db from '../../../helpers/db'
 import jwtService from '../../../services/jwt-service'
+import User from '../../../models/User'
 
 export default {
   async signUp(ctx){
-    const client = await db.pool.connect()
-    if(!client){
-      throw Error('Отсутствует клиент подключения к бд')
-    }
+
+  /* 
+    const all = await User.findAll({attributes: ['id_user', 'email', 'first_name', "default_role"]});
+    return ctx.body = {data: all} 
+  */
     try{
       const {pass, email} = ctx.request.body
-      const {rows} = await client.query('select * from test_store')
-      const sameUser = rows.find(user => user.login === email)
-      if(sameUser){
-        ctx.throw(400, {message: 'Такой пользователь уже есть'})
-        throw Error('Такой пользователь уже есть');
-      }else{
-        const qweryStr='INSERT INTO test_store(email,password) values($1,$2)';
-        await client.query(qweryStr,[email, pass])
-        console.log('NEW USER HAS BEN CREATED')
-        const {rows} = await client.query('SELECT * from test_store where email = ($1)', [email])
+      await User.findOrCreate({
+        where:{
+          email:email,
+          password: pass
+        },
+        default:{
+          email:email,
+          password: pass
+        }
+      })
+      .then(res => console.log(res))
+      
+      // const {rows} = await client.query('select * from test_store')
+      // const sameUser = rows.find(user => user.login === email)
+      // if(sameUser){
+      //   ctx.throw(400, {message: 'Такой пользователь уже есть'})
+      //   throw Error('Такой пользователь уже есть');
+      // }else{
+      //   const qweryStr='INSERT INTO test_store(email,password) values($1,$2)';
+      //   await client.query(qweryStr,[email, pass])
+      //   console.log('NEW USER HAS BEN CREATED')
+      //   const {rows} = await client.query('SELECT * from test_store where email = ($1)', [email])
 
+      /* {
+            "id_user": 3,
+            "email": "admin",
+            "first_name": "admin",
+            "default_role": "teacher"
+        } */
         return ctx.body = {data: rows}
+      }catch(e){
+        console.log(e);
+        ctx.throw(400, {message: 'Такой пользователь уже есть'})
       }
-    }
-    finally{
-      client.release()
-    }
   },
   async signIn(ctx){
     const { email, pass, user_role } = ctx.request.body
     if(!email || !pass){
       ctx.throw(400, {message: 'Invalid data'})
     }
-    const client = await db.pool.connect()
-
-    if(!client){
-      ctx.throw(400, {message: 'Not connection to db'})
-      throw Error('Not connection to db')
-    }
-
     try{
-    const user = await client.query('SELECT * from users where email = ($1) and password = $2', [email, pass]).then(res=>res.rows[0]);
+    const user = await User.findOne({
+      where:{
+        email:email,
+        password:pass
+      },
+      attributes: {
+        exclude: ['createdAt', 'updatedAt']
+      }
+    })
     
-    console.log(user.all_roles);
-
-    user.all_roles.includes(user_role) 
-    ? (await client.query('update profiles set p_role = $1 where user_id = $2', [user_role, user.id_user]))
-    : (await client.query('update profiles set p_role = $1 where user_id = $2', [user.default_role, user.id_user]));
+    // user.all_roles.includes(user_role) 
+    // ? (await client.query('update profiles set p_role = $1 where user_id = $2', [user_role, user.id_user]))
+    // : (await client.query('update profiles set p_role = $1 where user_id = $2', [user.default_role, user.id_user]));
 
     if(!user || user.length===0){
       ctx.throw(400, {message: 'User not found'})
     }
 
-    const token = await jwtService.genToken({email})
+    const token = jwtService.genToken(user.email)
     
-    // console.log(email, pass, user_role);
-        
-    ctx.body={
-      data:{
-        token:token
-      }
-    }
+    ctx.body= {data: {token} }
 
     }catch (e){
       throw e
-    }
-    finally{
-      client.release()
     }
   },
   
   async me(ctx){
     const { authorization } = ctx.headers;
-
+    
     if(authorization){
       try{
-        const client = await db.pool.connect()
-        if(!client){
-          ctx.throw(401, { message: 'Отсутствует клиент подключения к бд' })
-        }
-        const { email } = jwtService.verify(authorization);
-
-        const user = await client.query('select * from users where email = $1 limit 1', [email]).then(res => (res.rows[0]))
-        delete user.password
         
-        const profile = await client.query('select * from profiles where user_id = $1',[user.id_user]).then(res => (res.rows[0]))
+        const email  = jwtService.verify(authorization);
 
-        ctx.body = {user, ...profile } 
+        const user = await User.findOne({
+          where:{
+            email:email
+          },
+          attributes: {
+            exclude: ['createdAt', 'updatedAt', 'password']
+          }
+        }
+      )
+        
+      ctx.body = {user}
+        
+        // const profile = await client.query('select * from profiles where user_id = $1',[user.id_user]).then(res => (res.rows[0]))
 
-        client.release()
+        // ctx.body = {user, ...profile } 
+
       } catch(e) {
         ctx.throw(401, {message: 'Error in work with database'})
       }

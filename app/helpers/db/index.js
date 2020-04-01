@@ -1,11 +1,12 @@
-import {PSQL_URI} from '../../config'
-import {Pool} from 'pg'
-import connectionString from 'pg-connection-string'
-var parse = connectionString.parse
+import Sequelize from 'sequelize'
 
-const pool = new Pool(parse(PSQL_URI))
-
-module.exports = {
-  pool: pool,
-  query: (text, params) => pool.query(text, params),
-}
+module.exports = new Sequelize('aplication','marcus','marcus', {
+  host: 'localhost',
+  dialect: "postgres",
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
+  }
+});
