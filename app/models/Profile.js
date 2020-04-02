@@ -1,6 +1,7 @@
 import Sequelize from 'sequelize'
 import db from '../helpers/db/index'
 import User from './User'
+import Department from './Department'
 
 const Profile = db.define('profile', {
   //atributes
@@ -14,23 +15,11 @@ const Profile = db.define('profile', {
   },
   p_role:{
     type: Sequelize.STRING    
-  },
-  department_id:{
-    type: Sequelize.INTEGER
-  },
-  user_id:{
-    type: Sequelize.INTEGER
   }
 });
 
-User.hasOne(Profile);
-Profile.belongsTo(User, {
-  foreignKey: 'user_id'
-});
-
-User.hasOne(Department);
-Department.belongsTo(User, {
-  foreignKey: 'department_id'
+User.hasOne(Profile,{
+  onDelete: "cascade",
 });
 
 module.exports = Profile;

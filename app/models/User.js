@@ -3,11 +3,6 @@ import db from '../helpers/db/index'
 
 const User = db.define('user', {
   //atributes
-  id_user : {
-    type : Sequelize.BIGINT,
-    autoIncrement : true,
-    primaryKey : true
-  },
   email:{
     type: Sequelize.STRING
   },
