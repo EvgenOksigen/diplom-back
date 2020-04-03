@@ -5,11 +5,6 @@ import Department from './Department'
 
 const Profile = db.define('profile', {
   //atributes
-  id_profile : {
-    type : Sequelize.BIGINT,
-    autoIncrement : true,
-    primaryKey : true
-  },
   p_year:{
     type: Sequelize.STRING
   },

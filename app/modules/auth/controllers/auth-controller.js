@@ -6,7 +6,6 @@ import Profile from '../../../models/Profile'
 export default {
   async signUp(ctx){
     let d = new Date()
-    let user_G
 
       const {pass, email, first_name, last_name,father_name, birth_date, default_role, all_roles } = ctx.request.body
       await User.create({
@@ -20,17 +19,17 @@ export default {
           all_roles:all_roles
       })
       .then(async user => {
-        user_G = user
+        ctx.body = {user}
         await Profile.create({
           p_year: d.getFullYear(),
           p_role:default_role,
           user_id:user.id
-        }).then(profile=>{
-          user.setProfile(profile).catch(e=>console.log(e))
+        }).then(profile=>{user.setProfile(profile)
+            .catch(e=>console.log(e))
         })
       }).catch(e=>console.log(e))
 
-      return ctx.body = {user_G}
+      return ctx.body
 
   },
   async signIn(ctx){
@@ -39,7 +38,9 @@ export default {
       ctx.throw(400, {message: 'Invalid data'})
     }
     try{
-    const user = await User.findOne({
+    let userF
+
+    await User.findOne({
       where:{
         email:email,
         password:pass
@@ -47,19 +48,19 @@ export default {
       attributes: {
         exclude: ['createdAt', 'updatedAt']
       }
-    })/* .then(user=>{
-      
-    }) */
-    
-    // user.all_roles.includes(user_role) 
-    // ? await Profile.update({p_role:user_role}, {where:{user_id : user.user_id}})
-    // : await Profile.update({p_role:user.default_role},{where:{user_id : user.user_id}})
+    }).then(user=>{
+          user.all_roles.includes(user_role) 
+          ? Profile.update({p_role : user_role}, {where:{userId : user.id}})
+          : Profile.update({p_role : user.default_role},{where:{userId : user.id}});
+          return userF = user
+        }
+      )
 
-    if(!user || user.length===0){
+    if(!userF || userF.length===0){
       ctx.throw(400, {message: 'User not found'})
     }
 
-    const token = jwtService.genToken(user.email)
+    const token = jwtService.genToken(userF.email)
     
     ctx.body = {data: {token} }
 
