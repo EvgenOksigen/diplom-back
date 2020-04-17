@@ -1,4 +1,4 @@
-import jwtService from '../services/jwt-service'
+import jwtService from '../services/jwt.service'
 import User from '../models/User'
 
 export default () => async (ctx, next) => {

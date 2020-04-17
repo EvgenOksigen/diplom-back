@@ -1,7 +1,6 @@
 import Sequelize from 'sequelize'
 import db from '../helpers/db/index'
 import User from './User'
-import Department from './Department'
 
 const Profile = db.define('profile', {
   //atributes
