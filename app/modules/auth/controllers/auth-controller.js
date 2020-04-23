@@ -42,11 +42,7 @@ export default {
   
   async me(ctx){
     const { authorization } = ctx.headers;
-    // try{
       ctx.body = await AuthService.me(authorization)
-      // } catch(e) {
-        // ctx.throw(401, {message: 'Cant take a user'})
-      // }
     },
 
   async test(ctx){
