@@ -19,7 +19,6 @@ if(!JWT_SECRET){
   throw Error ('You mast pass jwt secret string')
 }
 
-
 export {
   PORT,
   PSQL_URI,

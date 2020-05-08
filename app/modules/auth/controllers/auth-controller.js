@@ -1,97 +1,102 @@
-import db from '../../../helpers/db'
-import jwtService from '../../../services/jwt-service'
+import User from '../../../models/User'
+import Profile from '../../../models/Profile'
+import AuthService from '../../../services/auth.service'
+import Test from '../../../models/Test'
 
 export default {
   async signUp(ctx){
-    const client = await db.pool.connect()
-    if(!client){
-      throw Error('Отсутствует клиент подключения к бд')
-    }
-    try{
-      const {pass, email} = ctx.request.body
-      const {rows} = await client.query('select * from test_store')
-      const sameUser = rows.find(user => user.login === email)
-      if(sameUser){
-        ctx.throw(400, {message: 'Такой пользователь уже есть'})
-        throw Error('Такой пользователь уже есть');
-      }else{
-        const qweryStr='INSERT INTO test_store(email,password) values($1,$2)';
-        await client.query(qweryStr,[email, pass])
-        console.log('NEW USER HAS BEN CREATED')
-        const {rows} = await client.query('SELECT * from test_store where email = ($1)', [email])
+    let d = new Date()
 
-        return ctx.body = {data: rows}
-      }
-    }
-    finally{
-      client.release()
-    }
+      const {pass, email, first_name, last_name,father_name, birth_date, default_role, all_roles } = ctx.request.body
+      await User.create({
+          email:email,
+          first_name:first_name,
+          last_name:last_name,
+          father_name:father_name,
+          birth_date:birth_date,
+          password: pass,
+          default_role:default_role,
+          all_roles:all_roles
+      })
+      .then(async user => {
+        ctx.body = {user}
+        await Profile.create({
+          p_year: d.getFullYear(),
+          p_role:default_role,
+          user_id:user.id
+        }).then(profile=>user.setProfile(profile))
+          .catch(e=>console.log(e))
+      }).catch(e=>console.log(e))
+
+      return ctx.body
+
   },
   async signIn(ctx){
     const { email, pass, user_role } = ctx.request.body
     if(!email || !pass){
-      ctx.throw(400, {message: 'Invalid data'})
-    }
-    const client = await db.pool.connect()
-
-    if(!client){
-      ctx.throw(400, {message: 'Not connection to db'})
-      throw Error('Not connection to db')
-    }
-
-    try{
-    const user = await client.query('SELECT * from users where email = ($1) and password = $2', [email, pass]).then(res=>res.rows[0]);
-    
-    console.log(user.all_roles);
-
-    user.all_roles.includes(user_role) 
-    ? (await client.query('update profiles set p_role = $1 where user_id = $2', [user_role, user.id_user]))
-    : (await client.query('update profiles set p_role = $1 where user_id = $2', [user.default_role, user.id_user]));
-
-    if(!user || user.length===0){
-      ctx.throw(400, {message: 'User not found'})
-    }
-
-    const token = await jwtService.genToken({email})
-    
-    // console.log(email, pass, user_role);
-        
-    ctx.body={
-      data:{
-        token:token
+      ctx.throw(400, {message: 'Empty field mail or password'})
       }
-    }
-
-    }catch (e){
-      throw e
-    }
-    finally{
-      client.release()
-    }
+    ctx.body = await AuthService.signIn(email, pass, user_role)
   },
   
   async me(ctx){
     const { authorization } = ctx.headers;
+      ctx.body = await AuthService.me(authorization)
+    },
 
-    if(authorization){
-      try{
-        const client = await db.pool.connect()
-        if(!client){
-          ctx.throw(401, { message: 'Отсутствует клиент подключения к бд' })
-        }
-        const { email } = jwtService.verify(authorization);
+  async test(ctx){
+    await Test.findAll({
+      attributes: {
+        exclude: ['createdAt', 'updatedAt'],
+      },
+      // include: [{
+      //   model: Profile,
+      //   attributes: {
+      //     exclude: ['createdAt', 'updatedAt']
+      //   }
+      // }]
+    }).then(users=>{
+      console.log(users);
+      ctx.body = users
+    })
+  },
 
-        const user = await client.query('select * from users where email = $1 limit 1', [email]).then(res => (res.rows[0]))
-        delete user.password
-        
-        const profile = await client.query('select * from profiles where user_id = $1',[user.id_user]).then(res => (res.rows[0]))
+  async create(ctx){
+    const {test} = ctx.request.body
+    // console.log(test);
+    const right_answer = []
+    test.question.map((q, qi)=>{
+      q.answers.map((a,ai)=>{
+        if(a.right){
+          return right_answer.push({question : qi, rightAnswer:ai})
+         }
+      })
+    })
 
-        ctx.body = {user, ...profile } 
+    await Test.create({
+      test_json:test,
+      right_answer: right_answer,
+      passed: false
+    })
+    
+    ctx.body = 'Test has created.'
+  },
+  async testRight(ctx){ // code  from sequelize repo
+    const mMap = new Map();
+    
+    let student_answ = ctx.request.body.answers;
+    let {right_answer} = await Test.findOne({attributes:['right_answer']})
+    let res = []
+    
+    student_answ.map((el,i)=>{
+      mMap.set(right_answer[i],el)
+    })
 
-        client.release()
-      } catch(e) {
-        ctx.throw(401, {message: 'Error in work with database'})
-      }
+    for (var [key, value] of mMap) {
+      res.push(key === value)
     }
-  }
+    
+    await Test.update({passed:true}, {where:{right_answer:right_answer}})
+    ctx.body = [...res]
+  },
 }

@@ -1,17 +1,38 @@
 {
+  "plugins": ["eslint-plugin-react", "flowtype", "react-hooks"],
   "parser": "babel-eslint",
-  "env": {
-    "node": true,
-    "es6": true
-  },
-  "parserOptions": {
-    "sourceType": "module"
-  },
-  "extends": ["eslint: recommended", "google"],
   "rules": {
-    "no-console": 0,
-    "object-curly-spacing": 0,
-    "max-len": 0,
-    "require-jsdoc": 0
+    "jsx-a11y/href-no-hash": "off",
+    "jsx-a11y/anchor-is-valid": ["warn", { "aspects": ["invalidHref"] }],
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+    "import/no-extraneous-dependencies": 0,
+    "flowtype/no-types-missing-file-annotation": 0,
+    "react/react-in-jsx-scope": 0,
+    "react-hooks/exhaustive-deps": "off"
+  },
+  "settings": {
+    "import/resolver": "webpack",
+    "react": {
+      "createClass": "createReactClass",
+      "pragma": "React",
+      "version": "16.8.6"
+    },
+    "propWrapperFunctions": ["forbidExtraProps"],
+    "flowtype": {
+      "onlyFilesWithFlowAnnotation": false
+    }
+  },
+  "extends": [
+    "react-app",
+    "plugin:prettier/recommended",
+    "plugin:flowtype/recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 7,
+    "ecmaFeatures": {
+      "experimentalDecorators": true,
+      "jsx": true
+    },
+    "sourceType": "module"
   }
 }
