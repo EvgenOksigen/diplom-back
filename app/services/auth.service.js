@@ -29,8 +29,10 @@ class AuthService {
     if(!usr || usr.length===0){
         throw(400, {message: 'User not found'})
         }
-    
-    const token = jwtService.genToken(usr.email)
+    const token = jwtService.genToken({
+      email:email,
+      password:pass
+    })
 
     return {data: {token} }
     }catch(e){
@@ -40,10 +42,11 @@ class AuthService {
   async me(authorization){
     if(authorization){
         try{
-          const email  = jwtService.verify(authorization);
+          const {email, password}  = jwtService.verify(authorization);
           const user = await User.findOne({
             where:{
-              email:email
+              email:email,
+              password:password
             },
             attributes: {
               exclude: ['createdAt', 'updatedAt', 'password']

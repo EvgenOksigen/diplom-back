@@ -7,6 +7,7 @@ router
   .post('/signup', authCtrl.signUp)
   .post('/signin', authCtrl.signIn)
   .get('/me', authCtrl.me)
-  .get('/test', authCtrl.test)
+  .get('/allTest', authCtrl.test)
+  .post('/create-test', authCtrl.create)
 
 export default router.routes();

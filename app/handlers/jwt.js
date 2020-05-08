@@ -6,11 +6,11 @@ export default () => async (ctx, next) => {
 
   if(authorization){
     try{
-
-      const email =  jwtService.verify(authorization);
+      const {email, password} =  jwtService.verify(authorization);
       const user = await User.findOne({
         where:{
-          email:email
+          email:email,
+          password:password
         },
         attributes: {
           exclude: ['createdAt', 'updatedAt']
