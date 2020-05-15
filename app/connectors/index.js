@@ -12,8 +12,8 @@ const connectorsInit = async () => {
     console.error('Unable to connect to the database:', error);
   }
   try{
-    // await db.sync()
-    await db.sync({ alter: true })
+    await db.sync()
+    // await db.sync({ alter: true })
     // await db.sync({ force: true })
     console.log("All models were synchronized successfully.", db.models);
   }catch(e){
