@@ -1,24 +1,24 @@
-import server from '../server'
+import server from "../server";
 
-import db from '../helpers/db/index'
+import db from "../helpers/db/index";
 
 const connectorsInit = async () => {
-  try{
+  try {
     await db.authenticate();
-    console.log('Connection has been established successfully.');
+    console.log("Connection has been established successfully.");
   } catch (error) {
-    db.close()
-    server.close()
-    console.error('Unable to connect to the database:', error);
+    db.close();
+    server.close();
+    console.error("Unable to connect to the database:", error);
   }
-  try{
-    await db.sync()
-    // await db.sync({ alter: true })
-    // await db.sync({ force: true })
+  try {
+    await db.sync();
+    // await db.sync({ alter: true });
+    // await db.sync({ force: true });
     console.log("All models were synchronized successfully.", db.models);
-  }catch(e){
-    console.error('Unable to sync database:', error);
+  } catch (e) {
+    console.error("Unable to sync database:", error);
   }
-}
+};
 
 export default connectorsInit;

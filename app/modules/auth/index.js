@@ -8,6 +8,7 @@ router
   .post('/auth/signup', authCtrl.signUp)
   .post('/auth/signin', authCtrl.signIn)
   .get('/auth/me', authCtrl.me)
+  
   .get('/test/all', testCtrl.testAll)
   .get('/test/:id?', testCtrl.testById)
   .post('/test/create', testCtrl.create)
